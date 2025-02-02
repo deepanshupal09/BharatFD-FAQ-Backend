@@ -1,0 +1,41 @@
+{
+  "name": "faq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "dev": "concurrently \"npx tsc -w\"  \"nodemon dist/server.js\"",
+    "test": "nyc mocha --require ts-node/register tests/**.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/express": "^5.0.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^22.13.0",
+    "@types/sinon": "^17.0.3",
+    "chai": "^4.3.7",
+    "cross-env": "^7.0.3",
+    "mocha": "^10.2.0",
+    "nyc": "^17.1.0",
+    "sinon": "^19.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@google-cloud/translate": "^8.5.0",
+    "@types/redis": "^4.0.11",
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.13.0",
+    "mongoose": "^8.9.6",
+    "nodemon": "^3.1.9",
+    "redis": "^4.7.0"
+  }
+}
