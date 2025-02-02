@@ -1,4 +1,3 @@
-import { Translate } from "@google-cloud/translate/build/src/v2";
 import { FAQDocument } from "../model/faqModel";
 import dotenv from "dotenv";
 import axios from 'axios';
@@ -17,23 +16,21 @@ interface TranslationResponse {
 
 export const translateFAQ = async (faq: FAQDocument) => {
     const targetLangs = ['hi', 'bn', 'es', 'fr'];
-
-    try{
+    try {
         if (!faq.translations) {
-            faq.translations = new Map(); // or initialize with an empty object if that's what you need
+            faq.translations = new Map();
         }
-        for(const lang of targetLangs) {
-            // Translate question
+        for (const lang of targetLangs) {
             const questionResponse = await axios.post<TranslationResponse>(
-                'https://translation.googleapis.com/language/translate/v2', 
+                'https://translation.googleapis.com/language/translate/v2',
                 {
                     q: faq.question,
                     target: lang,
                     format: 'text'
                 },
                 {
-                    params: { 
-                        key : process.env.GOOGLE_TRANSLATE_KEY,
+                    params: {
+                        key: process.env.GOOGLE_TRANSLATE_KEY,
                         alt: 'json'
                     }
                 }
@@ -41,34 +38,28 @@ export const translateFAQ = async (faq: FAQDocument) => {
 
             // Translate answer
             const answerResponse = await axios.post<TranslationResponse>(
-                'https://translation.googleapis.com/language/translate/v2', 
+                'https://translation.googleapis.com/language/translate/v2',
                 {
                     q: faq.answer,
                     target: lang,
                     format: 'html'
                 },
                 {
-                    params: { 
-                        key : process.env.GOOGLE_TRANSLATE_KEY,
+                    params: {
+                        key: process.env.GOOGLE_TRANSLATE_KEY,
                         alt: 'json'
                     }
                 }
             );
 
             const questionTranslation = questionResponse.data.data.translations[0].translatedText;
-
-            console.log("Duke: ",questionTranslation);
-            //answer translation to be set in cache
             const answerTranslation = answerResponse.data.data.translations[0].translatedText;
-
-            console.log("Duke Answer: ",answerTranslation);
-            console.log("FAQ: ", faq)
 
             faq.translations.set(lang, questionTranslation);
             await setCacheTranslation(faq._id.toString(), lang, answerTranslation);
         }
         await faq.save();
-    }catch(error){
+    } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error('Translation error details:', error.response?.data || error.message);
         } else {

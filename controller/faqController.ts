@@ -5,17 +5,15 @@ import { getCacheTranslation, invalidateCache, setCacheTranslation } from '../se
 
 export class FAQController {
     public static async createFaq(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const { question, answer } = req.body;
-            if(!question || !answer){
+            if (!question || !answer) {
                 res.status(400).json({ error: 'Missing required fields' });
             }
-
-            const newFAQ : FAQDocument = new FAQ({
+            const newFAQ: FAQDocument = new FAQ({
                 question,
                 answer
             });
-
             const savedFAQ = await newFAQ.save();
             translateFAQ(savedFAQ).catch(error => console.error('Translation Failed: ', error));
             res.status(201).json({
@@ -24,14 +22,14 @@ export class FAQController {
                 answer: savedFAQ.answer,
                 message: 'FAQ created. Translations in progress.'
             });
-        }catch(error){
+        } catch (error) {
             console.error('Error creating FAQ:', error);
-            res.status(500).json({message : 'Internal Server Error'});
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 
     public static async getFAQ(req: Request, res: Response) {
-        try{
+        try {
             const lang = req.query.lang as string || 'en';
             const faqs = await FAQ.find();
 
@@ -42,35 +40,34 @@ export class FAQController {
                     id: faq._id,
                     question: faq.getTranslatedQuestion(lang),
                     answer: cachedTranslation || faq.answer
-                    // translations: Array.from(faq.translations.entries())
                 };
             }));
-            
+
             res.json(response);
-        }catch(error){
+        } catch (error) {
             console.error('Get FAQs error: ', error);
-            res.status(500).json({message : 'Internal Server Error'});
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 
     public static async updateFAQ(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const { id } = req.query;
             const { question, answer } = req.body;
 
             const faq = await FAQ.findById(id);
-            if(!faq){
+            if (!faq) {
                 res.status(404).json({ message: 'FAQ not found' });
                 return;
             }
 
-            if(question) faq.question = question;
-            if(answer) faq.answer = answer;
+            if (question) faq.question = question;
+            if (answer) faq.answer = answer;
 
             const updatedFaq = await faq.save();
             await invalidateCache(id as string);
             translateFAQ(faq).catch(error => console.error('Retranslation Failed: ', error));
-            
+
             res.json({
                 id: updatedFaq._id,
                 question: updatedFaq.question,
@@ -78,29 +75,28 @@ export class FAQController {
                 message: 'FAQ updated. Retranslating content'
 
             });
-        }catch(error){
+        } catch (error) {
             console.error('Update FAQ error: ', error);
-            res.status(500).json({message : 'Internal Server Error'});
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 
     public static async deleteFAQ(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const { id } = req.query;
             const deletedFaq = await FAQ.findByIdAndDelete(id);
-            if(!deletedFaq){
+            if (!deletedFaq) {
                 res.status(404).json({ message: 'FAQ not found' });
                 return;
             }
-
             await invalidateCache(id as string);
-            res.json({ 
-                message: 'FAQ deleted' ,
+            res.json({
+                message: 'FAQ deleted',
                 deletedId: deletedFaq._id
             });
-        }catch(error){
+        } catch (error) {
             console.error('Delete FAQ error: ', error);
-            res.status(500).json({message : 'Internal Server Error'});
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 }

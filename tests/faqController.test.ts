@@ -104,7 +104,7 @@ describe('FAQController', () => {
         question: 'Q1',
         answer: 'A1',
         translations: new Map([['es', 'Q1_es']]),
-        getTranslatedQuestion: function(lang: string) {
+        getTranslatedQuestion: function (lang: string) {
           return this.translations.get(lang) || this.question;
         },
       }] as unknown as FAQDocument[];
